@@ -10,6 +10,11 @@ Ported from JavaScript to Java by [Eric Butler](https://twitter.com/codebutler) 
 
 ## Usage
 
+this fork includes a constructor for setting a timeout on the socket as well as some additional gradle build directives for uploading this artifact to a nexus repo. you will need to specify a gradle.properties file (ignored in this repo) with the following variables:
+nexusBaseUrl = <base url of the nexus repo you are targeting>
+nexusUsername = <username for nexus repo with appropriate upload privelages>
+nexusPassword = <password for user account>
+
 Here's the entire API:
 
 ```java

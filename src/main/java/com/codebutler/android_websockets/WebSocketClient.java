@@ -19,6 +19,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.security.KeyManagementException;
@@ -37,6 +38,7 @@ public class WebSocketClient {
     private Handler                  mHandler;
     private List<BasicNameValuePair> mExtraHeaders;
     private HybiParser               mParser;
+    private int                      mTimeout;
 
     private final Object mSendLock = new Object();
 
@@ -47,10 +49,15 @@ public class WebSocketClient {
     }
 
     public WebSocketClient(URI uri, Listener listener, List<BasicNameValuePair> extraHeaders) {
+        this(uri,listener,extraHeaders,-1);
+    }
+
+    public WebSocketClient(URI uri, Listener listener, List<BasicNameValuePair> extraHeaders, int timeout) {
         mURI          = uri;
         mListener = listener;
         mExtraHeaders = extraHeaders;
         mParser       = new HybiParser(this);
+        mTimeout = timeout;
 
         mHandlerThread = new HandlerThread("websocket-thread");
         mHandlerThread.start();
@@ -83,7 +90,15 @@ public class WebSocketClient {
                     URI origin = new URI(originScheme, "//" + mURI.getHost(), null);
 
                     SocketFactory factory = mURI.getScheme().equals("wss") ? getSSLSocketFactory() : SocketFactory.getDefault();
-                    mSocket = factory.createSocket(mURI.getHost(), port);
+//                    mSocket = factory.createSocket(mURI.getHost(), port);
+                    mSocket = factory.createSocket();
+
+                    InetSocketAddress socketAddress = new InetSocketAddress(mURI.getHost(), port);
+                    if(mTimeout != -1) {
+                        mSocket.connect(socketAddress, mTimeout);
+                    } else {
+                        mSocket.connect(socketAddress);
+                    }
 
                     PrintWriter out = new PrintWriter(mSocket.getOutputStream());
                     out.print("GET " + path + " HTTP/1.1\r\n");

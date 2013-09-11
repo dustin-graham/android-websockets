@@ -1,9 +1,29 @@
 def android_jar = new File(System.getenv('ANDROID_HOME'), '/platforms/android-17/android.jar')
 
 apply plugin: 'java'
+apply plugin: 'maven'
+
+repositories {
+    maven {
+        url nexusBaseUrl + "/nexus/content/groups/public"
+    }
+}
 
 sourceCompatibility = 1.5
 
 dependencies {
-  compile files(android_jar)
+    compile files(android_jar)
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: nexusBaseUrl + "/nexus/content/repositories/thirdparty") {
+                authentication(userName: nexusUsername, password: nexusPassword)
+            }
+            pom.version = "1.0.1"
+            pom.artifactId = "android-websockets"
+            pom.groupId = "com.codebutler"
+        }
+    }
 }
